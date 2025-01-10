@@ -25,7 +25,6 @@ class Mmg4DofInWavesBasicParams:
     GM: float
     D_p: float
     A_R: float
-    H_R: float
     x_R: float
     I_zz: float
     η: float
@@ -137,7 +136,6 @@ def simulate_mmg_4dof_in_waves(
         GM=basic_params.GM,
         D_p=basic_params.D_p,
         A_R=basic_params.A_R,
-        H_R=basic_params.H_R,
         x_R=basic_params.x_R,
         I_zz=basic_params.I_zz,
         η=basic_params.η,
