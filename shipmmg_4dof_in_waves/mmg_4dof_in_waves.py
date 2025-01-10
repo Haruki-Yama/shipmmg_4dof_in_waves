@@ -445,7 +445,8 @@ def simulate(
         d_u = ((X_H + X_R + X_P) + (m + m_y) * v * r) / (m + m_x)
         d_v = ((Y_H + Y_R) - (m + m_x) * u * r) / (m + m_y)
         d_r = (N_H + N_R - x_G * (Y_H + Y_R)) / (I_zz + J_zz)
-        d_p = (K_H + z_G * Y_H - B_44 * p - C_44 * φ - (z_R - z_G) * Y_R + (z_H - z_G) * (m_y * d_v + m_x * u * r))
+        d_p = -(K_H + z_G * Y_H + B_44 * p + C_44 * φ - (z_R - z_G) * Y_R + (z_H - z_G) * (m_y * d_v + m_x * u * r))
+        # d_p = (K_H + z_G * Y_H - B_44 * p - C_44 * φ - (z_R - z_G) * Y_R + (z_H - z_G) * (m_y * d_v + m_x * u * r))
         
         d_x = u * np.cos(ψ) - v * np.sin(ψ)
         d_y = u * np.sin(ψ) + v * np.cos(ψ)
