@@ -20,8 +20,6 @@ class Mmg4DofInWavesBasicParams:
     z_H: float
     m_x: float
     m_y: float
-    m_x_dash: float
-    m_y_dash: float
     GM: float
     D_p: float
     A_R: float
@@ -33,25 +31,22 @@ class Mmg4DofInWavesBasicParams:
     t_R: float
     a_H: float
     x_H: float
-    γ_R0: float
+    γ_R_plus: float
+    γ_R_minus: float
+    l_P_dash: float
     l_R_dash: float
-    z_R: float
+    z_P_dash: float
+    z_R_dash: float
     κ: float
     t_P: float
     w_P0: float
-    x_P: float
     I_xx: float
     J_xx: float
     J_zz: float
-    c_x0: float
-    c_xββ: float
-    c_xrr: float
-    c_nβ: float
-    c_yβ: float
-    c_nr: float
-    c_yr: float
-    c_γ: float
     a: float
+    b: float
+    α_z: float
+    z_R: float
     
     
     
@@ -61,12 +56,14 @@ class Mmg4DofInWavesManeuveringParams:
     k_0: float
     k_1: float
     k_2: float
-    X_0_dash: float
+    R_0_dash: float
     X_vv_dash: float
     X_vr_dash: float
     X_rr_dash: float
     X_vvvv_dash: float
+    X_vφ_dash: float
     X_rφ_dash: float
+    X_φφ_dash: float
     Y_v_dash: float
     Y_r_dash: float
     Y_vvv_dash: float
@@ -75,8 +72,9 @@ class Mmg4DofInWavesManeuveringParams:
     Y_rrr_dash: float
     Y_φ_dash: float
     Y_vvφ_dash: float
-    Y_vrφ_dash: float
+    Y_vφφ_dash: float
     Y_rrφ_dash: float
+    Y_rφφ_dash: float
     N_v_dash: float
     N_r_dash: float
     N_vvv_dash: float
@@ -85,18 +83,9 @@ class Mmg4DofInWavesManeuveringParams:
     N_rrr_dash: float
     N_φ_dash: float
     N_vvφ_dash: float
-    N_vrφ_dash: float
+    N_vφφ_dash: float
     N_rrφ_dash: float
-    K_φ_dash: float
-    K_v_dash: float
-    K_r_dash: float
-    K_vvφ_dash: float
-    K_vrφ_dash: float
-    K_rrφ_dash: float
-    K_vvv_dash: float
-    K_vvr_dash: float
-    K_vrr_dash: float
-    K_rrr_dash: float
+    N_rφφ_dash: float
     
     
 def simulate_mmg_4dof_in_waves(
@@ -131,8 +120,6 @@ def simulate_mmg_4dof_in_waves(
         z_H=basic_params.z_H,
         m_x=basic_params.m_x,
         m_y=basic_params.m_y,
-        m_x_dash=basic_params.m_x_dash,
-        m_y_dash=basic_params.m_y_dash,
         GM=basic_params.GM,
         D_p=basic_params.D_p,
         A_R=basic_params.A_R,
@@ -144,34 +131,33 @@ def simulate_mmg_4dof_in_waves(
         t_R=basic_params.t_R,
         a_H=basic_params.a_H,
         x_H=basic_params.x_H,
-        γ_R0=basic_params.γ_R0,
+        γ_R_plus=basic_params.γ_R_plus,
+        γ_R_minus=basic_params.γ_R_minus,
+        l_P_dash=basic_params.l_P_dash,
         l_R_dash=basic_params.l_R_dash,
-        z_R=basic_params.z_R,
+        z_P_dash=basic_params.z_P_dash,
+        z_R_dash=basic_params.z_R_dash,
         κ=basic_params.κ,
         t_P=basic_params.t_P,
         w_P0=basic_params.w_P0,
-        x_P=basic_params.x_P,
         I_xx=basic_params.I_xx,
         J_xx=basic_params.J_xx,
         J_zz=basic_params.J_zz,
-        c_x0=basic_params.c_x0,
-        c_xββ=basic_params.c_xββ,
-        c_xrr=basic_params.c_xrr,
-        c_nβ=basic_params.c_nβ,
-        c_yβ=basic_params.c_yβ,
-        c_nr=basic_params.c_nr,
-        c_yr=basic_params.c_yr,
-        c_γ=basic_params.c_γ,
         a=basic_params.a,
+        b=basic_params.b,
+        α_z=basic_params.α_z,
+        z_R=basic_params.z_R,
         k_0=maneuvering_params.k_0,
         k_1=maneuvering_params.k_1,
         k_2=maneuvering_params.k_2,
-        X_0_dash=maneuvering_params.X_0_dash,
+        R_0_dash=maneuvering_params.R_0_dash,
         X_vv_dash=maneuvering_params.X_vv_dash,
         X_vr_dash=maneuvering_params.X_vr_dash,
         X_rr_dash=maneuvering_params.X_rr_dash,
         X_vvvv_dash=maneuvering_params.X_vvvv_dash,
+        X_vφ_dash=maneuvering_params.X_vφ_dash,
         X_rφ_dash=maneuvering_params.X_rφ_dash,
+        X_φφ_dash=maneuvering_params.X_φφ_dash,
         Y_v_dash=maneuvering_params.Y_v_dash,
         Y_r_dash=maneuvering_params.Y_r_dash,
         Y_vvv_dash=maneuvering_params.Y_vvv_dash,
@@ -180,8 +166,9 @@ def simulate_mmg_4dof_in_waves(
         Y_rrr_dash=maneuvering_params.Y_rrr_dash,
         Y_φ_dash=maneuvering_params.Y_φ_dash,
         Y_vvφ_dash=maneuvering_params.Y_vvφ_dash,
-        Y_vrφ_dash=maneuvering_params.Y_vrφ_dash,
+        Y_vφφ_dash=maneuvering_params.Y_vφφ_dash,
         Y_rrφ_dash=maneuvering_params.Y_rrφ_dash,
+        Y_rφφ_dash=maneuvering_params.Y_rφφ_dash,
         N_v_dash=maneuvering_params.N_v_dash,
         N_r_dash=maneuvering_params.N_r_dash,
         N_vvv_dash=maneuvering_params.N_vvv_dash,
@@ -190,18 +177,9 @@ def simulate_mmg_4dof_in_waves(
         N_rrr_dash=maneuvering_params.N_rrr_dash,
         N_φ_dash=maneuvering_params.N_φ_dash,
         N_vvφ_dash=maneuvering_params.N_vvφ_dash,
-        N_vrφ_dash=maneuvering_params.N_vrφ_dash,
+        N_vφφ_dash=maneuvering_params.N_vφφ_dash,
         N_rrφ_dash=maneuvering_params.N_rrφ_dash,
-        K_φ_dash=maneuvering_params.K_φ_dash,
-        K_v_dash=maneuvering_params.K_v_dash,
-        K_r_dash=maneuvering_params.K_r_dash,
-        K_vvφ_dash=maneuvering_params.K_vvφ_dash,
-        K_vrφ_dash=maneuvering_params.K_vrφ_dash,
-        K_rrφ_dash=maneuvering_params.K_rrφ_dash,
-        K_vvv_dash=maneuvering_params.K_vvv_dash,
-        K_vvr_dash=maneuvering_params.K_vvr_dash,
-        K_vrr_dash=maneuvering_params.K_vrr_dash,
-        K_rrr_dash=maneuvering_params.K_rrr_dash,
+        N_rφφ_dash=maneuvering_params.N_rφφ_dash,
         time_list=time_list,
         δ_list=δ_list,
         nps_list=nps_list,
@@ -233,8 +211,6 @@ def simulate(
     z_H: float,
     m_x: float,
     m_y: float,
-    m_x_dash: float,
-    m_y_dash: float,
     GM: float,
     D_p: float,
     A_R: float,
@@ -246,34 +222,33 @@ def simulate(
     t_R: float,
     a_H: float,
     x_H: float,
-    γ_R0: float,
+    γ_R_plus: float,
+    γ_R_minus: float,
+    l_P_dash: float,
     l_R_dash: float,
-    z_R: float,
+    z_P_dash: float,
+    z_R_dash: float,
     κ: float,
     t_P: float,
     w_P0: float,
-    x_P: float,
     I_xx: float,
     J_xx: float,
     J_zz: float,
-    c_x0: float,
-    c_xββ: float,
-    c_xrr: float,
-    c_nβ: float,
-    c_yβ: float,
-    c_nr: float,
-    c_yr: float,
-    c_γ: float,
     a: float,
+    b: float,
+    α_z: float,
+    z_R: float,
     k_0: float,
     k_1: float,
     k_2: float,
-    X_0_dash: float,
+    R_0_dash: float,
     X_vv_dash: float,
     X_vr_dash: float,
     X_rr_dash: float,
     X_vvvv_dash: float,
+    X_vφ_dash: float,
     X_rφ_dash: float,
+    X_φφ_dash: float,
     Y_v_dash: float,
     Y_r_dash: float,
     Y_vvv_dash: float,
@@ -282,8 +257,9 @@ def simulate(
     Y_rrr_dash: float,
     Y_φ_dash: float,
     Y_vvφ_dash: float,
-    Y_vrφ_dash: float,
+    Y_vφφ_dash: float,
     Y_rrφ_dash: float,
+    Y_rφφ_dash: float,
     N_v_dash: float,
     N_r_dash: float,
     N_vvv_dash: float,
@@ -292,18 +268,9 @@ def simulate(
     N_rrr_dash: float,
     N_φ_dash: float,
     N_vvφ_dash: float,
-    N_vrφ_dash: float,
+    N_vφφ_dash: float,
     N_rrφ_dash: float,
-    K_φ_dash: float,
-    K_v_dash: float,
-    K_r_dash: float,
-    K_vvφ_dash: float,
-    K_vrφ_dash: float,
-    K_rrφ_dash: float,
-    K_vvv_dash: float,
-    K_vvr_dash: float,
-    K_vrr_dash: float,
-    K_rrr_dash: float,
+    N_rφφ_dash: float,
     time_list: List[float],
     δ_list: List[float],
     nps_list: List[float],
@@ -330,19 +297,24 @@ def simulate(
         
         u, v, r, p, x, y, ψ, φ, δ, nps = X
         
-        U = np.sqrt(u**2 + (v - r * x_G) ** 2)
+        v_m = v - x_G * r + z_G * p
         
-        β = 0.0 if U == 0.0 else np.arcsin(-(v - r * x_G) / U)
+        U = np.sqrt(u**2 + v_m** 2)
+        
+        β = 0.0 if u == 0.0 else np.arctan2(-v_m, u)
         v_dash = 0.0 if U == 0.0 else v / U
         r_dash = 0.0 if U == 0.0 else r * L_pp / U
+        p_dash = 0.0 if U == 0.0 else p * B / U
         
-        w_P = w_P0 * np.exp(-4.0 * (β - x_P * r_dash) ** 2)
+        β_P = β - l_P_dash * r_dash + z_P_dash * p_dash
+        
+        w_P = w_P0 * (1 - (1 - np.cos(β_P)**2) * (1 - np.abs(β_P)))
         
         J = 0.0 if nps == 0.0 else u * (1 - w_P) / (nps * D_p)
         K_T = k_0 + k_1 * J + k_2 * J**2
-        β_R = β - l_R_dash * r_dash
-        γ_R = γ_R0 * (1 + c_γ * np.abs(φ))
-        v_R = 0.0 if U == 0.0 else -U * γ_R * (β - l_R_dash * r_dash + (p * (z_R - z_G) / U))
+        β_R = β - l_R_dash * r_dash + z_R_dash * p_dash
+        γ_R = γ_R_minus if β_R < 0.0 else γ_R_plus
+        v_R = U * γ_R * β_R
         u_R = (
             np.sqrt(η * (κ * ϵ * 8.0 * k_0 * nps**2 * D_p**4 / np.pi) ** 2)
             if J == 0.0
@@ -368,12 +340,14 @@ def simulate(
             * d
             * (U**2)
             * (
-                X_0_dash * (1 + c_x0 * np.abs(φ))
+                -R_0_dash
+                + X_vv_dash * v_dash**2
+                + X_vr_dash * v_dash * r_dash
+                + X_rr_dash * r_dash**2
+                + X_vvvv_dash * v_dash**4
+                + X_vφ_dash * v_dash * φ
                 + X_rφ_dash * r_dash * φ
-                + X_vv_dash * (1 + c_xββ * np.abs(φ)) * (v_dash**2)
-                + (X_vr_dash - m_y_dash) * v_dash * r_dash
-                + X_rr_dash * (1 + c_xrr * np.abs(φ)) * (r_dash**2)
-                + X_vvvv_dash * (v_dash**4)
+                + X_φφ_dash * φ**2
             )
         )
         
@@ -385,16 +359,17 @@ def simulate(
             * d
             * (U**2)
             * (
-                Y_φ_dash * φ
-                + Y_v_dash * (1 + c_yβ * np.abs(φ)) * v_dash 
-                + (Y_r_dash - m_x_dash) * (1 + c_yr * np.abs(φ)) * r_dash
-                + Y_vvφ_dash * (v_dash**2) * φ
-                + Y_vrφ_dash * v_dash * r_dash * φ
-                + Y_rrφ_dash * (r_dash**2) * φ
-                + Y_vvv_dash * (v_dash**3)
-                + Y_vvr_dash * (v_dash**2) * r_dash
-                + Y_vrr_dash * v_dash * (r_dash**2)
-                + Y_rrr_dash * (r_dash**3)
+                Y_v_dash * v_dash
+                + Y_r_dash * r_dash
+                + Y_vvv_dash * v_dash**3
+                + Y_vvr_dash * v_dash**2 * r_dash
+                + Y_vrr_dash * v_dash * r_dash**2
+                + Y_rrr_dash * r_dash**3
+                + Y_φ_dash * φ
+                + Y_vvφ_dash * v_dash**2 * φ
+                + Y_vφφ_dash * v_dash * φ**2
+                + Y_rrφ_dash * r_dash**2 * φ
+                + Y_rφφ_dash * r_dash * φ**2
             )
         )
         
@@ -406,47 +381,40 @@ def simulate(
             * d
             * (U**2)
             * (
-                N_φ_dash * φ
-                + N_v_dash * (1 + c_nβ * np.abs(φ)) * v_dash
-                + N_r_dash * (1 + c_nr * np.abs(φ)) * r_dash
-                + N_vvφ_dash * (v_dash**2) * φ
-                + N_vrφ_dash * v_dash * r_dash * φ
-                + N_rrφ_dash * (r_dash**2) * φ
-                + N_vvv_dash * (v_dash**3)
-                + N_vvr_dash * (v_dash**2) * r_dash
-                + N_vrr_dash * v_dash * (r_dash**2)
-                + N_rrr_dash * (r_dash**3)
+                N_v_dash * v_dash
+                + N_r_dash * r_dash
+                + N_vvv_dash * v_dash**3
+                + N_vvr_dash * v_dash**2 * r_dash
+                + N_vrr_dash * v_dash * r_dash**2
+                + N_rrr_dash * r_dash**3
+                + N_φ_dash * φ
+                + N_vvφ_dash * v_dash**2 * φ
+                + N_vφφ_dash * v_dash * φ**2
+                + N_rrφ_dash * r_dash**2 * φ
+                + N_rφφ_dash * r_dash * φ**2
             )
         )
         
-        K_H = (
-            -0.5
-            * ρ
-            * L_pp
-            * (d**2)
-            * (U**2)
-            * (
-                K_φ_dash * φ
-                + K_v_dash * v_dash
-                + K_r_dash * r_dash
-                + K_vvφ_dash * (v_dash**2) * φ
-                + K_vrφ_dash * v_dash * r_dash * φ
-                + K_rrφ_dash * (r_dash**2) * φ
-                + K_vvv_dash * (v_dash**3)
-                + K_vvr_dash * (v_dash**2) * r_dash
-                + K_vrr_dash * v_dash * (r_dash**2)
-                + K_rrr_dash * (r_dash**3)
-            )
-        )
         
-        B_44 = 2 * a / np.pi * np.sqrt(g * m * GM * (I_xx + J_xx))
-        C_44 = g * m * GM
+        K_p = -2 / np.pi * a * np.sqrt(m * g * GM * (I_xx + J_xx))
+        K_pp = -0.75 * b * (180 / np.pi) * (I_xx + J_xx)
         
-        d_u = ((X_H + X_R + X_P) + (m + m_y) * v * r) / (m + m_x)
-        d_v = ((Y_H + Y_R) - (m + m_x) * u * r) / (m + m_y)
-        d_r = (N_H + N_R - x_G * (Y_H + Y_R)) / (I_zz + J_zz)
-        d_p = -(K_H + z_G * Y_H + B_44 * p + C_44 * φ - (z_R - z_G) * Y_R + (z_H - z_G) * (m_y * d_v + m_x * u * r))
-        # d_p = (K_H + z_G * Y_H - B_44 * p - C_44 * φ - (z_R - z_G) * Y_R + (z_H - z_G) * (m_y * d_v + m_x * u * r))
+        X = X_H + X_R + X_P
+        Y = Y_H + Y_R
+        N = N_H + N_R
+        K = -Y_H * z_H - Y_R * z_R - m * g * GM * φ + K_p * p + K_pp * p * np.abs(p)
+        
+        A = (m + m_y) - (m_y * α_z + m * z_G)**2 / (I_xx + J_xx + m * z_G**2)
+        B = x_G * m - (m_y * α_z + m * z_G) * m * z_G * x_G / (I_xx + J_xx + m * z_G**2)
+        C = Y - (m + m_x) * u * r + (m_y * α_z + m * z_G) * (K + m * z_G * u * r) / (I_xx + J_xx + m * z_G**2)
+        D = m * x_G * (1 - z_G * (m_y * α_z + m * z_G) / (I_xx + J_xx + m * z_G**2))
+        E = (I_zz + J_zz + m * x_G**2) - m * z_G**2 * x_G / (I_xx + J_xx + m * z_G**2)
+        F = N + m * x_G * (z_G * (K + m * z_G * u * r) / (I_xx + J_xx + m * z_G**2) - u * r)
+        
+        d_u = ((X_H + X_R + X_P) + (m + m_y) * v * r + m * x_G * (r**2) - m * z_G * r * p) / (m + m_x)
+        d_v = (C * E - B * F) / (A * E - B * D)
+        d_r = (C * D - A * F) / (B * D - A * E)
+        d_p = (K + (m_y * α_z + m * z_G) * v_m + m * z_G * (x_G * d_r + u * r)) / (I_xx + J_xx + m * z_G**2)
         
         d_x = u * np.cos(ψ) - v * np.sin(ψ)
         d_y = u * np.sin(ψ) + v * np.cos(ψ)
