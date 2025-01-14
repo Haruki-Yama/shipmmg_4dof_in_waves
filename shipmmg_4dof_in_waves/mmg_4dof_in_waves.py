@@ -7,6 +7,8 @@ from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
 from scipy.misc import derivative
 
+from wave_induced_steady_force_coefficients import si_C_XW_index, si_C_YW, si_C_NW, U_values
+
 @dataclasses.dataclass
 class Mmg4DofInWavesBasicParams:
     
@@ -47,6 +49,8 @@ class Mmg4DofInWavesBasicParams:
     b: float
     α_z: float
     z_R: float
+    h_a: float
+    z_W: float
     
     
     
@@ -102,6 +106,7 @@ def simulate_mmg_4dof_in_waves(
     y0: float = 0.0,
     ψ0: float = 0.0,
     φ0: float = 0.0,
+    χ0: float = 0.0,
     ρ: float = 1025.0,
     method: str = "RK45",
     t_eval=None,
@@ -147,6 +152,8 @@ def simulate_mmg_4dof_in_waves(
         b=basic_params.b,
         α_z=basic_params.α_z,
         z_R=basic_params.z_R,
+        h_a=basic_params.h_a,
+        z_W=basic_params.z_W,
         k_0=maneuvering_params.k_0,
         k_1=maneuvering_params.k_1,
         k_2=maneuvering_params.k_2,
@@ -238,6 +245,8 @@ def simulate(
     b: float,
     α_z: float,
     z_R: float,
+    h_a: float,
+    z_W: float,
     k_0: float,
     k_1: float,
     k_2: float,
@@ -282,6 +291,7 @@ def simulate(
     y0: float = 0.0,
     ψ0: float = 0.0,
     φ0: float = 0.0,
+    χ0: float = 0.0,
     ρ: float = 1025.0,
     method: str = "RK45",
     t_eval=None,
@@ -396,24 +406,37 @@ def simulate(
         )
         
         
+        C_XW_index = min(range(len(U_values)), key=lambda i: abs(U - U_values[i]))
+        χ = χ0 + (ψ * 180 / np.pi)
+        si_C_XW = si_C_XW_index[C_XW_index]
+        
+        C_XW = si_C_XW(χ)
+        C_YW = si_C_YW(χ)
+        C_NW = si_C_NW(χ)
+        
+        X_W = ρ * g * (h_a**2) * L_pp * C_XW
+        Y_W = ρ * g * (h_a**2) * L_pp * C_YW
+        N_W = ρ * g * (h_a**2) * (L_pp**2) * C_NW
+        
+        
         K_p = -2 / np.pi * a * np.sqrt(m * g * GM * (I_xx + J_xx))
         K_pp = -0.75 * b * (180 / np.pi) * (I_xx + J_xx)
         
-        X = X_H + X_R + X_P
-        Y = Y_H + Y_R
-        N = N_H + N_R
-        K = -Y_H * z_H - Y_R * z_R - m * g * GM * φ + K_p * p + K_pp * p * np.abs(p)
+        X = X_H + X_R + X_P + X_W
+        Y = Y_H + Y_R + Y_W
+        N = N_H + N_R + N_W
+        K = -Y_H * z_H - Y_R * z_R - m * g * GM * φ + K_p * p + K_pp * p * np.abs(p) + z_W * Y_W
         
-        A = (m + m_y) - (m_y * α_z + m * z_G)**2 / (I_xx + J_xx + m * z_G**2)
-        B = x_G * m - (m_y * α_z + m * z_G) * m * z_G * x_G / (I_xx + J_xx + m * z_G**2)
-        C = Y - (m + m_x) * u * r + (m_y * α_z + m * z_G) * (K + m * z_G * u * r) / (I_xx + J_xx + m * z_G**2)
-        D = m * x_G * (1 - z_G * (m_y * α_z + m * z_G) / (I_xx + J_xx + m * z_G**2))
-        E = (I_zz + J_zz + m * x_G**2) - m * z_G**2 * x_G / (I_xx + J_xx + m * z_G**2)
-        F = N + m * x_G * (z_G * (K + m * z_G * u * r) / (I_xx + J_xx + m * z_G**2) - u * r)
+        A_ = (m + m_y) - (m_y * α_z + m * z_G)**2 / (I_xx + J_xx + m * z_G**2)
+        B_ = x_G * m - (m_y * α_z + m * z_G) * m * z_G * x_G / (I_xx + J_xx + m * z_G**2)
+        C_ = Y - (m + m_x) * u * r + (m_y * α_z + m * z_G) * (K + m * z_G * u * r) / (I_xx + J_xx + m * z_G**2)
+        D_ = m * x_G * (1 - z_G * (m_y * α_z + m * z_G) / (I_xx + J_xx + m * z_G**2))
+        E_ = (I_zz + J_zz + m * x_G**2) - m * z_G**2 * x_G / (I_xx + J_xx + m * z_G**2)
+        F_ = N + m * x_G * (z_G * (K + m * z_G * u * r) / (I_xx + J_xx + m * z_G**2) - u * r)
         
-        d_u = ((X_H + X_R + X_P) + (m + m_y) * v * r + m * x_G * (r**2) - m * z_G * r * p) / (m + m_x)
-        d_v = (C * E - B * F) / (A * E - B * D)
-        d_r = (C * D - A * F) / (B * D - A * E)
+        d_u = (X + (m + m_y) * v * r + m * x_G * (r**2) - m * z_G * r * p) / (m + m_x)
+        d_v = (C_ * E_ - B_ * F_) / (A_ * E_ - B_ * D_)
+        d_r = (C_ * D_ - A_ * F_) / (B_ * D_ - A_ * E_)
         d_p = (K + (m_y * α_z + m * z_G) * v_m + m * z_G * (x_G * d_r + u * r)) / (I_xx + J_xx + m * z_G**2)
         
         d_x = u * np.cos(ψ) - v * np.sin(ψ)
