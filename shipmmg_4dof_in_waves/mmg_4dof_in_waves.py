@@ -407,7 +407,7 @@ def simulate(
         
         
         C_XW_index = min(range(len(U_values)), key=lambda i: abs(U - U_values[i]))
-        χ = χ0 + (ψ * 180 / np.pi)
+        χ = χ0 - (ψ * 180 / np.pi) #χとχ0が逆かも？
         si_C_XW = si_C_XW_index[C_XW_index]
         
         C_XW = si_C_XW(χ)
@@ -417,6 +417,12 @@ def simulate(
         X_W = ρ * g * (h_a**2) * L_pp * C_XW
         Y_W = ρ * g * (h_a**2) * L_pp * C_YW
         N_W = ρ * g * (h_a**2) * (L_pp**2) * C_NW
+        K_W = z_W * Y_W
+        
+        # X_W = 0
+        # Y_W = 0
+        # N_W = 0
+        # K_W = 0
         
         
         K_p = -2 / np.pi * a * np.sqrt(m * g * GM * (I_xx + J_xx))
@@ -425,7 +431,7 @@ def simulate(
         X = X_H + X_R + X_P + X_W
         Y = Y_H + Y_R + Y_W
         N = N_H + N_R + N_W
-        K = -Y_H * z_H - Y_R * z_R - m * g * GM * φ + K_p * p + K_pp * p * np.abs(p) + z_W * Y_W
+        K = -Y_H * z_H - Y_R * z_R - m * g * GM * φ + K_p * p + K_pp * p * np.abs(p) + z_W * K_W
         
         A_ = (m + m_y) - (m_y * α_z + m * z_G)**2 / (I_xx + J_xx + m * z_G**2)
         B_ = x_G * m - (m_y * α_z + m * z_G) * m * z_G * x_G / (I_xx + J_xx + m * z_G**2)
@@ -437,7 +443,7 @@ def simulate(
         d_u = (X + (m + m_y) * v * r + m * x_G * (r**2) - m * z_G * r * p) / (m + m_x)
         d_v = (C_ * E_ - B_ * F_) / (A_ * E_ - B_ * D_)
         d_r = (C_ * D_ - A_ * F_) / (B_ * D_ - A_ * E_)
-        d_p = (K + (m_y * α_z + m * z_G) * v_m + m * z_G * (x_G * d_r + u * r)) / (I_xx + J_xx + m * z_G**2)
+        d_p = (K + (m_y * α_z + m * z_G) * d_v + m * z_G * (x_G * d_r + u * r)) / (I_xx + J_xx + m * z_G**2)
         
         d_x = u * np.cos(ψ) - v * np.sin(ψ)
         d_y = u * np.sin(ψ) + v * np.cos(ψ)
@@ -463,3 +469,87 @@ def simulate(
         
         
         
+def get_wave_values_from_simulation_result(
+    u_list: List[float],
+    v_list: List[float],
+    r_list: List[float],
+    p_list: List[float],
+    ψ_list: List[float],
+    basic_params: Mmg4DofInWavesBasicParams,
+    ρ: float = 1025.0,
+    return_all_values: bool = False,
+):
+    v_m_list = list(
+        map(
+            lambda v, r, p: v - basic_params.x_G * r + basic_params.z_G * p,
+            v_list,
+            r_list,
+            p_list,
+        )
+    )
+    U_list = list(
+        map(
+            lambda u, v_m: np.sqrt(u**2 + v_m**2),
+            u_list,
+            v_m_list,
+        )
+    )
+    C_XW_index = list(
+        map(
+            lambda U: min(range(len(U_values)), key=lambda i: abs(U - U_values[i])),
+            U_list,
+        )
+    )
+    χ_list = list(map(lambda ψ: -ψ * 180 / np.pi, ψ_list))
+    si_C_XW = list(
+        map(
+            lambda C_XW_index: si_C_XW_index[C_XW_index],
+            C_XW_index,
+        )
+    )
+    C_XW_list = list(map(lambda si_C_XW, χ: si_C_XW(χ), si_C_XW, χ_list))
+    C_YW_list = list(map(lambda χ: si_C_YW(χ), χ_list))
+    C_NW_list = list(map(lambda χ: si_C_NW(χ), χ_list))
+    
+    X_W_list = list(
+        map(
+            lambda C_XW: ρ * basic_params.g * (basic_params.h_a**2) * basic_params.L_pp * C_XW,
+            C_XW_list,
+        )
+    )
+    Y_W_list = list(
+        map(
+            lambda C_YW: ρ * basic_params.g * (basic_params.h_a**2) * basic_params.L_pp * C_YW,
+            C_YW_list,
+        )
+    )
+    N_W_list = list(
+        map(
+            lambda C_NW: ρ * basic_params.g * (basic_params.h_a**2) * (basic_params.L_pp**2) * C_NW,
+            C_NW_list,
+        )
+    )
+    K_W_list = list(
+        map(
+            lambda Y_W: basic_params.z_W * Y_W,
+            Y_W_list,
+        )
+    )
+    if return_all_values:
+        return (
+            X_W_list,
+            Y_W_list,
+            N_W_list,
+            v_m_list,
+            U_list,
+            C_XW_list,
+            C_YW_list,
+            C_NW_list,
+        )
+    else:
+        return (
+            X_W_list,
+            Y_W_list,
+            N_W_list,
+            K_W_list,
+        )
